@@ -1,11 +1,24 @@
-import React from "react";
-import GitHubCalendar from "react-github-calendar";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { Tooltip } from "react-tooltip";
-import "react-tooltip/dist/react-tooltip.css";
+
+const GitHubCalendar = React.lazy(() => import("react-github-calendar"));
+const Tooltip = React.lazy(() =>
+  import("react-tooltip").then((mod) => ({ default: mod.Tooltip }))
+);
 
 const OpenSourceSection = () => {
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  useEffect(() => {
+    // Show calendar after component mounts to avoid blocking page render
+    const timer = setTimeout(() => {
+      setShowCalendar(true);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section id="open-source" className="py-20 md:py-28 bg-slate-950">
       <div className="container mx-auto px-4 text-center">
@@ -18,19 +31,29 @@ const OpenSourceSection = () => {
         </p>
 
         <div className="flex justify-center p-4 bg-slate-900 rounded-lg">
-          <GitHubCalendar
-            username="manish-lal12"
-            blockSize={15}
-            blockMargin={5}
-            colorScheme="dark"
-            renderBlock={(block, activity) =>
-              React.cloneElement(block, {
-                "data-tooltip-id": "gh-tooltip",
-                "data-tooltip-content": `${activity.count} contributions on ${activity.date}`,
-              })
-            }
-          />
-          <Tooltip id="gh-tooltip" />
+          {showCalendar && (
+            <React.Suspense
+              fallback={
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-slate-300">Loading contributions...</div>
+                </div>
+              }
+            >
+              <GitHubCalendar
+                username="manish-lal12"
+                blockSize={15}
+                blockMargin={5}
+                colorScheme="dark"
+                renderBlock={(block, activity) =>
+                  React.cloneElement(block, {
+                    "data-tooltip-id": "gh-tooltip",
+                    "data-tooltip-content": `${activity.count} contributions on ${activity.date}`,
+                  })
+                }
+              />
+              <Tooltip id="gh-tooltip" />
+            </React.Suspense>
+          )}
         </div>
 
         <div className="mt-10">

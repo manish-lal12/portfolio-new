@@ -5,13 +5,24 @@ import { Menu, X, Download } from "lucide-react";
 const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
+      // Detect navbar scroll background
       setIsScrolled(window.scrollY > 50);
+
+      // Calculate scroll progress
+      const scrollTop = window.scrollY;
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / scrollHeight) * 100;
+      setScrollProgress(progress);
     };
 
     window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Initialize on mount
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -63,7 +74,11 @@ const Navigation = () => {
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></span>
               </button>
             ))}
-            <a href="https://drive.google.com/uc?export=download&id=1OmRJoBUXGCwRyZ_fjn150771o9JU4uGe">
+            <a
+              href="https://drive.google.com/uc?export=download&id=1OmRJoBUXGCwRyZ_fjn150771o9JU4uGe"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button
                 size="sm"
                 className="bg-accent-gradient hover:shadow-glow transition-all duration-300"
@@ -101,16 +116,10 @@ const Navigation = () => {
         )}
       </div>
 
-      {/* Scroll Progress Bar */}
+      {/* ✅ Scroll Progress Bar (now dynamic) */}
       <div
-        className="h-0.5 bg-accent-gradient transition-all duration-300"
-        style={{
-          width: `${
-            (window.scrollY /
-              (document.documentElement.scrollHeight - window.innerHeight)) *
-            100
-          }%`,
-        }}
+        className="h-0.5 bg-accent-gradient transition-[width] duration-150 fixed top-0 left-0 z-50"
+        style={{ width: `${scrollProgress}%` }}
       />
     </nav>
   );
